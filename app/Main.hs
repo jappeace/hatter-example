@@ -1,4 +1,10 @@
+{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE ImportQualifiedPost #-}
 -- | The whole app: a greeting and a tap counter.
+--
+-- The LANGUAGE pragmas must live here: the mobile builds compile this
+-- file with GHC directly, so default-extensions in the cabal file do
+-- not apply to it.
 --
 -- hatter calls 'main' once when the Android activity (or iOS view)
 -- starts. It returns the 'AppContext' the platform layer keeps around;
