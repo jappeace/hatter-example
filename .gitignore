@@ -1,0 +1,7 @@
+dist-newstyle/
+.ghc.environment.*
+result
+result-*
+cabal.project.local
+build-native.log
+build-apk.log

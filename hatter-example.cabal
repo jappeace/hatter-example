@@ -1,0 +1,26 @@
+cabal-version: 3.0
+name:          hatter-example
+version:       0.1.0.0
+synopsis:      Hello world mobile app built with hatter
+author:        Jappie Klooster
+maintainer:    hi@jappie.me
+license:       MIT
+license-file:  LICENSE
+build-type:    Simple
+
+-- The mobile builds (default.nix, nix/ios.nix) do not use this file:
+-- hatter's lib.nix compiles app/Main.hs directly, so language
+-- extensions go in LANGUAGE pragmas in that file, not here. This
+-- stanza exists for the desktop typecheck (nix/native.nix) and for
+-- editor tooling.
+executable hatter-example
+  main-is:          Main.hs
+  hs-source-dirs:   app
+  default-language: Haskell2010
+  ghc-options:
+      -Wall -Wincomplete-uni-patterns -Wincomplete-record-updates
+      -Widentities -Wredundant-constraints -Wpartial-fields
+  build-depends:
+      base   >= 4.9 && < 5
+    , hatter
+    , text   < 3
