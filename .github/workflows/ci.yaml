@@ -1,0 +1,55 @@
+on:
+  pull_request:
+  push:
+    branches:
+      - master
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+    - name: Free disk space
+      run: |
+        sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache
+        df -h
+    - uses: actions/checkout@v4
+    - uses: cachix/install-nix-action@v31
+      with:
+        extra_nix_config: |
+          access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
+          extra-substituters = https://nix-cache.jappie.me
+          extra-trusted-public-keys = nix-cache.jappie.me:WjkKcvFtHih2i+n7bdsrJ3HuGboJiU2hA2CZbf9I9oc=
+          http2 = false
+          download-attempts = 10
+    - name: Build all targets (native typecheck, Android .so both archs, APK)
+      run: nix-build nix/ci.nix -A all-builds -o result
+    - name: Upload APK
+      uses: actions/upload-artifact@v4
+      with:
+        name: hatter-example-apk
+        path: result/apk/hatter-example.apk
+
+  build-ios:
+    runs-on: macos-latest
+    timeout-minutes: 90
+    steps:
+    - uses: actions/checkout@v4
+    - uses: cachix/install-nix-action@v31
+      with:
+        extra_nix_config: |
+          access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
+          extra-substituters = https://nix-cache.jappie.me
+          extra-trusted-public-keys = nix-cache.jappie.me:WjkKcvFtHih2i+n7bdsrJ3HuGboJiU2hA2CZbf9I9oc=
+          http2 = false
+          download-attempts = 10
+    - name: Build iOS library (simulator)
+      run: nix-build nix/ci.nix -A ios-simulator
+    - name: Build iOS library (device)
+      run: nix-build nix/ci.nix -A ios-lib
+    - name: Stage iOS Xcode project
+      run: nix-build nix/ci.nix -A ios-app
